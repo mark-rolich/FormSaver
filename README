@@ -1,0 +1,4 @@
+This PHP class can be used to display form field values 
+submitted by POST without additional markup in the HTML form
+
+Copyright (C) 2012  Mark Rolich
