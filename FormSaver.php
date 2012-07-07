@@ -81,12 +81,16 @@ class FormSaver
     {
         if ($select->hasAttribute('multiple') && is_array($value)) {
             foreach ($select->childNodes as $option) {
+                $option->removeAttribute('selected');
+
                 if (in_array($option->getAttribute('value'), $value)) {
                     $option->setAttribute('selected', 'true');
                 }
             }
         } else {
             foreach ($select->childNodes as $option) {
+                $option->removeAttribute('selected');
+
                 if ($option->getAttribute('value') == $value) {
                     $option->setAttribute('selected', 'true');
                 }
@@ -104,15 +108,22 @@ class FormSaver
     private function handleCheckbox($checkbox, $value)
     {
         if (is_array($value)) {
+            $checkbox->removeAttribute('checked');
+
             foreach ($value as $val) {
                 if ($checkbox->getAttribute('value') == $val) {
                     $checkbox->setAttribute('checked', 'true');
                 }
             }
-        } elseif ($checkbox->hasAttribute('value')
+        } else {
+            if ($checkbox->hasAttribute('value')
                   && $checkbox->getAttribute('value') == $value
-                  || !$checkbox->hasAttribute('value')) {
-            $checkbox->setAttribute('checked', 'true');
+                  || !$checkbox->hasAttribute('value'))
+            {
+                $checkbox->setAttribute('checked', 'true');
+            } else {
+                $checkbox->removeAttribute('checked');
+            }
         }
     }
 
@@ -140,7 +151,7 @@ class FormSaver
 
         $checkPost = $elements[0]->getAttribute('name');
 
-        if (isset($post[$checkPost])) {
+        if (!empty($post)) {
 
             foreach ($elements as $element) {
                 if ($element->hasAttribute('name')) {
@@ -157,14 +168,27 @@ class FormSaver
                                 case 'radio':
                                     if ($element->getAttribute('value') == $post[$name]) {
                                         $element->setAttribute('checked', 'true');
+                                    } else {
+                                        $element->removeAttribute('checked');
                                     }
 
                                     break;
                                 default:
                                     $element->setAttribute('value', $post[$name]);
                             }
-                        } else {
+                        } elseif ($element->nodeName == 'textarea') {
                             $element->nodeValue = $post[$name];
+                        }
+                    // checkbox and select multiple can be not submitted
+                    } else {
+                        if (!in_array($name, $this->excludeFields)) {
+                            if ($element->nodeName == 'input') {
+                                $element->removeAttribute('checked');
+                            } elseif ($element->nodeName == 'select') {
+                                foreach ($element->childNodes as $option) {
+                                    $option->removeAttribute('selected');
+                                }
+                            }
                         }
                     }
                 }
