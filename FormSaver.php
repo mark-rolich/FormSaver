@@ -175,9 +175,6 @@ class FormSaver
         }
 
         echo $form;
-
-        ob_flush();
-        flush();
     }
 }
 ?>
